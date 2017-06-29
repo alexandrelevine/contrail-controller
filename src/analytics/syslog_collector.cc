@@ -2,6 +2,17 @@
  * Copyright (c) 2013 Juniper Networks, Inc. All rights reserved.
  */
 
+// For  grok
+extern "C" {
+  #include <grok.h>
+}
+#include <cstring>
+#include <cstdio>
+#include <queue>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+// for grok endd
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -170,6 +181,17 @@ bool SyslogParser::parse_syslog (Iterator start, Iterator end, syslog_m_t &v)
     using qi::char_;
     using qi::lit;
     using qi::lexeme;
+   
+    class grok_input {
+      public:
+        char input[256];
+        char patterns[256];
+    };
+
+    // Test for linkage to grok library
+    grok_t grok;
+    grok_init(&grok);
+    grok_free(&grok);
 
     qi::rule<Iterator, std::string(), ascii::space_type> word = lexeme[ +(char_ - ' ') ] ;
     qi::rule<Iterator, std::string(), ascii::space_type> word2 = lexeme[ +(char_ - ':' - ' ') ] ;
@@ -536,7 +558,7 @@ void SyslogParser::MakeSandesh (syslog_m_t v) {
 bool SyslogParser::ClientParse (SyslogQueueEntry *sqe) {
   std::string ip = sqe->ip;
   const uint8_t *p = buffer_cast<const uint8_t *>(sqe->data);
-#ifdef SYSLOG_DEBUG
+//#ifdef SYSLOG_DEBUG
   LOG(DEBUG, "cnt parser " << sqe->length << " bytes from (" <<
       ip << ":" << sqe->port << ")[");
 
@@ -544,7 +566,7 @@ bool SyslogParser::ClientParse (SyslogQueueEntry *sqe) {
       std::string str (p, p + sqe->length);
       LOG(DEBUG, str << "]\n");
   }
-#endif
+//#endif
 
   syslog_m_t v;
   int len = sqe->length;

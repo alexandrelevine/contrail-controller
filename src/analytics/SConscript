@@ -60,7 +60,7 @@ AnalyticsEnv.Prepend(LIBS=['cpuinfo',
         'ssl',
         'crypto',
         'boost_filesystem',
-        'boost_program_options'])
+        'boost_program_options','grok'])
 
 (PLATFORM, VERSION, EXTRA) = platform.linux_distribution()
 if PLATFORM.lower() != 'ubuntu' or (PLATFORM.lower() == 'ubuntu' and VERSION.find('16.') == 0):
@@ -130,7 +130,7 @@ if sys.platform != 'darwin':
                           '-lbase', '-lcpuinfo',
                           '-lprocess_info', '-lnodeinfo',
                           '-l:librdkafka.a', '-l:librdkafka++.a',
-                          '-Wl,--no-whole-archive'])
+                          '-Wl,--no-whole-archive']) 
 else:
     AnalyticsEnv.Prepend(LINKFLAGS = ['-Wl,-force_load,' + lib_base.path])
     AnalyticsEnv.Prepend(LINKFLAGS = ['-Wl,-force_load,' + lib_cpuinfo.path])
@@ -146,6 +146,7 @@ def RedisLuaBuild(env, scr_name):
 
 AnalyticsEnv_boost_no_unreach = AnalyticsEnv.Clone()
 AnalyticsEnv_boost_no_unreach.AppendUnique(CCFLAGS='-DBOOST_NO_UNREACHABLE_RETURN_DETECTION')
+AnalyticsEnv_boost_no_unreach.AppendUnique(CCFLAGS='-lgrok', delete_existing=1)
 syslog_collector_obj = AnalyticsEnv_boost_no_unreach.Object('syslog_collector.o', 'syslog_collector.cc')
 parser_util_obj = AnalyticsEnv_boost_no_unreach.Object('parser_util.o', 'parser_util.cc')
 
